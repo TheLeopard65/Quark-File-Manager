@@ -42,8 +42,8 @@ struct OPTIONS {
     std::string path = getenv(HOMEDIR);
     std::string clicked_path = "";
     std::string copy_path    = "";
-    int width  = 1280;
-    int height = 720;
+    int width  = 1600;
+    int height = 900;
     char search_path[100] = "";
     char new_name[100]    = "";
     bool is_app_options   = false;
@@ -98,9 +98,9 @@ int main() {
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags = ImGuiViewportFlags_IsPlatformMonitor;
-    float fontSize = 40.0f;
-    ImFont* customFont = io.Fonts->AddFontFromFileTTF("../resources/Courier-New.ttf", fontSize);
-    if (!customFont) std::cerr << "Failed to load font. Check the path and file.\n";
+	ImFont* bannerFont = io.Fonts->AddFontFromFileTTF("../resources/Courier-New.ttf", 120.0f);
+	ImFont* customFont = io.Fonts->AddFontFromFileTTF("../resources/Courier-New.ttf", 40.0f);
+	if (!customFont || !bannerFont) std::cerr << "Failed to load fonts.\n";
 	else io.FontDefault = customFont;
 	folder_icon = LoadTextureFromFile("../resources/folder.png");
 	file_icon   = LoadTextureFromFile("../resources/file.png");
@@ -125,10 +125,18 @@ int main() {
         ImGui::SetNextWindowPos(ImVec2(0,0));
         ImGui::SetNextWindowSize(ImVec2{(float) options.width, (float) options.height});
         ImGui::Begin("MainWindow", 0, main_window_flags);
-        {
-            left_window(options.path, bookmarks, bookmarks_window_flags);
-            main_window(options, file_manager_window_flags, options_window_flags);
-        }
+		{
+		    if (bannerFont) ImGui::PushFont(bannerFont);
+		    const char* bannerText = "QUARK FILE MANAGER";
+		    ImVec2 windowSize = ImGui::GetWindowSize();
+		    ImVec2 textSize = ImGui::CalcTextSize(bannerText);
+		    ImGui::SetCursorPosX((windowSize.x - textSize.x) * 0.5f);
+		    ImGui::Text("%s", bannerText);
+		    if (bannerFont) ImGui::PopFont();
+		    ImGui::Separator();
+		    left_window(options.path, bookmarks, bookmarks_window_flags);
+		    main_window(options, file_manager_window_flags, options_window_flags);
+		}
         glfwGetWindowSize(window, &options.width, &options.height);
         ImGui::End();
         ImGui::Render();
@@ -233,9 +241,12 @@ void main_window(OPTIONS& options, ImGuiWindowFlags file_manager_window_flags, I
 		        ImGui::TableSetColumnIndex(0);
 		        ImGui::PushID(i.path().string().c_str());
 		        ImGui::BeginGroup();
+				float iconPaddingLeft = 10.0f;
+				float iconPaddingRight = 10.0f;
+				ImGui::SetCursorPosX(ImGui::GetCursorPosX() + iconPaddingLeft);
 				ImGui::Image((void*)(intptr_t)(is_dir ? folder_icon : file_icon), ImVec2(40, 40));
-				ImGui::SameLine();
-				bool clicked = ImGui::Selectable(name.c_str(), false, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowDoubleClick, ImVec2(0, 45.0f));
+				ImGui::SameLine(0, iconPaddingRight);
+				bool clicked = ImGui::Selectable(name.c_str(), false, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowDoubleClick, ImVec2(0, 40.0f));
 				ImGui::EndGroup();
 				if (clicked) {
 				    if (ImGui::IsMouseDoubleClicked(0)) {
