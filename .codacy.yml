@@ -1,0 +1,36 @@
+---
+engines:
+  cppcheck:
+    language: cpp
+  duplication:
+    config:
+      languages:
+        - "cpp"
+
+languages:
+  cpp:
+    extensions:
+      - ".cpp"
+      - ".h"
+      - ".hpp"
+
+exclude_paths:
+  - ".codacy.yml"
+  - "vendor/**"
+  - "resources/**"
+  - ".git/**"
+  - "build/**"
+  - "CMakeFiles/**"
+  - "Makefile"
+  - "README.md"
+  - "requirements.txt"
+  - "CMakeLists.txt"
+
+coverage:
+  enabled: false
+
+notifications:
+  pull_requests:
+    enabled: true
+  comments:
+    enabled: true

@@ -81,14 +81,17 @@ int main() {
         HideConsole();
     #endif
     OPTIONS options;
-    std::string bookmarks[6] = {
+    std::string bookmarks[8] = {
         options.path,
-        options.path + SLASH + " DOCUMENTS ",
-        options.path + SLASH + " DOWNLOADS ",
-        options.path + SLASH + " MUSIC ",
-        options.path + SLASH + " PICTURES ",
-        options.path + SLASH + " VIDEOS "
+        options.path + SLASH + "Desktop",
+        options.path + SLASH + "Documents",
+        options.path + SLASH + "Downloads",
+        options.path + SLASH + "Music",
+        options.path + SLASH + "Pictures",
+        options.path + SLASH + "Videos",
+        options.path + SLASH + "Public"
     };
+
     assert(glfwInit() && "Could not init GLFW!");
     GLFWwindow *window = glfwCreateWindow(options.width, options.height, "QUARK FILE MANAGER", nullptr, nullptr);
     glfwSetErrorCallback([](int error, const char* description) { fprintf(stderr, "Error: %s\n", description); });
@@ -154,12 +157,12 @@ void left_window(std::string& path, std::string* bookmarks, ImGuiWindowFlags boo
     ImGui::SameLine();
     ImGui::SetCursorPosX(0);
     if (ImGui::BeginChild("Bookmarks", ImVec2(350, 0), true, bookmarks_window_flags)) {
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 8; i++) {
             if (bookmarks[i] != getenv(HOMEDIR)) {
                 intermediate = bookmarks[i].substr(bookmarks[i].rfind(SLASH)).erase(0, 1);
                 ImGui::BeginGroup();
 				ImGui::Image((void*)(intptr_t)folder_icon, ImVec2(38, 38));
-				ImGui::SameLine(10, 15);
+				ImGui::SameLine(10, 35);
 				ImGui::Selectable(intermediate.c_str(), false, 0, ImVec2(0, 40.0f));
 				ImGui::EndGroup();
 			} else {
@@ -180,9 +183,9 @@ void main_window(OPTIONS& options, ImGuiWindowFlags file_manager_window_flags, I
     ImGui::SameLine();
     ImGui::SetCursorPosX(350);
     if (ImGui::BeginChild("File Manager", ImVec2(0, 0), true, file_manager_window_flags)) {
+    	ImGui::BeginGroup();
         ImGui::BeginDisabled(options.path == getenv(HOMEDIR));
-        if (ImGui::ImageButton((void*)(intptr_t)go_back_icon, ImVec2(50, 40)))
-		    options.path = options.path.substr(0, options.path.rfind(SLASH));
+        if (ImGui::ImageButton((void*)(intptr_t)go_back_icon, ImVec2(50, 40))) options.path = options.path.substr(0, options.path.rfind(SLASH));
         ImGui::EndDisabled();
         ImGui::SameLine(0, 30);
         if (ImGui::Button("OPTIONS", ImVec2(0, 0))) {
@@ -192,7 +195,11 @@ void main_window(OPTIONS& options, ImGuiWindowFlags file_manager_window_flags, I
         }
         ImGui::SameLine(0, 30);
         ImGui::PushItemWidth(options.width - 400);
-        if (ImGui::InputText("##search", options.search_path, 100)) ImGui::PopItemWidth();
+        ImGui::PushStyleColor(ImGuiCol_FrameBg, ImGui::GetStyleColorVec4(ImGuiCol_FrameBg));
+        ImGui::InputText("##pwd", (char*)options.path.c_str(), options.path.size() + 1, ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_AutoSelectAll);
+        ImGui::PopStyleColor();
+        ImGui::PopItemWidth();
+        ImGui::EndGroup();
         if (ImGui::BeginTable("file_table", 5, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingStretchSame)) {
 		    ImGui::TableSetupColumn("NAME");
 		    ImGui::TableSetupColumn("SIZE", ImGuiTableColumnFlags_WidthFixed, 150.0f);

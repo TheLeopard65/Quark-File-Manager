@@ -1,0 +1,8 @@
+cmake
+libxrandr-dev
+libx11-dev
+libxext-dev
+libxi-dev
+libgl1-mesa-dev
+libxinerama-dev
+libxcursor-dev
