@@ -87,7 +87,7 @@ File-Manager/
 * Built with **C++17**
 * Uses **ImGui** for rendering custom GUI
 * Renders textures with **OpenGL**
-* Efficient filesystem browsing using `<filesystem>`
+* Efficient filesystem browsing using `NTFS and EXT4`
 * Platform-specific integrations for Linux (`xdg-open`) and Windows (`start`)
 
 ---
@@ -115,4 +115,4 @@ The repo/project is under the MIT License. See [`LICENSE`](LICENSE) for details.
 ## 💬 Feedback
 
 Found a bug? Want to suggest a feature?
-Open an [issue](https://github.com/your-username/Quark-File-Manager/issues).
+Open an [issue](https://github.com/TheLeopard65/Quark-File-Manager/issues).
