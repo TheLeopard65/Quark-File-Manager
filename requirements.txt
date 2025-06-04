@@ -6,3 +6,4 @@ libxi-dev
 libgl1-mesa-dev
 libxinerama-dev
 libxcursor-dev
+libimage-exiftool-perl
