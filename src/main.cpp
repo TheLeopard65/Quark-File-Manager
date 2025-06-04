@@ -12,6 +12,7 @@
 #include <cassert>
 #include <filesystem>
 #include <iostream>
+#include <fstream>
 #include <stdio.h>
 #include <vector>
 #include <iomanip>
@@ -263,6 +264,12 @@ void main_window(OPTIONS& options, ImGuiWindowFlags file_manager_window_flags, I
 				    }
 				    options.clicked_path = i.path().string();
 				}
+				if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+				    options.clicked_path = i.path().string();
+				    options.is_app_options = true;
+				    options.is_dir_options = false;
+				    options.mouse_pos = ImGui::GetMousePos();
+				}
 				ImGui::TableSetColumnIndex(1);
 				{
 				    float columnWidth = ImGui::GetColumnWidth();
@@ -322,27 +329,45 @@ void main_window(OPTIONS& options, ImGuiWindowFlags file_manager_window_flags, I
             ImGui::Selectable("New folder", false, 0, ImVec2(0, 40));
             if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(0)) options.is_create_folder = true;
             if (options.is_create_folder) {
-                ImGui::InputText("##new_folder_name", options.new_folder_name, 100);
-                ImGui::SameLine();
-                if (ImGui::Button("Ok") && strcmp(options.new_folder_name, "") != 0) {
-                    std::system(("mkdir " + options.clicked_path.substr(0, options.clicked_path.rfind(SLASH)) + SLASH + options.new_folder_name).c_str());
-                    options.is_app_options = false;
-                    options.is_create_folder = false;
-                    options.new_folder_name[0] = '\0';
-                }
-            }
+			    ImGui::SetKeyboardFocusHere();
+			    if (ImGui::InputText("##new_folder_name", options.new_folder_name, 100, 
+			        ImGuiInputTextFlags_EnterReturnsTrue)) {
+			        auto parent = std::filesystem::path(options.clicked_path).parent_path();
+			        auto new_dir = parent / options.new_folder_name;
+			        std::filesystem::create_directory(new_dir);
+			        options.is_app_options = options.is_create_folder = false;
+			        options.new_folder_name[0] = '\0';
+			    }
+			    ImGui::SameLine();
+			    if (ImGui::Button("Ok") && strlen(options.new_folder_name) > 0) {
+			        auto parent = std::filesystem::path(options.clicked_path).parent_path();
+			        auto new_dir = parent / options.new_folder_name;
+			        std::filesystem::create_directory(new_dir);
+			        options.is_app_options = options.is_create_folder = false;
+			        options.new_folder_name[0] = '\0';
+			    }
+			}
             ImGui::Selectable("New file", false, 0, ImVec2(0, 40));
             if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(0)) options.is_create_file = true;
             if (options.is_create_file) {
-                ImGui::InputText("##new_file_name", options.new_file_name, 100);
-                ImGui::SameLine();
-                if (ImGui::Button("Ok") && strcmp(options.new_file_name, "") != 0) {
-                    std::system(("touch " + options.clicked_path.substr(0, options.clicked_path.rfind(SLASH)) + SLASH + options.new_file_name).c_str());
-                    options.is_app_options = false;
-                    options.is_create_file = false;
-                    options.new_file_name[0] = '\0';
-                }
-            }
+			    ImGui::SetKeyboardFocusHere();
+			    if (ImGui::InputText("##new_file_name", options.new_file_name, 100, 
+			        ImGuiInputTextFlags_EnterReturnsTrue)) {
+			        auto parent = std::filesystem::path(options.clicked_path).parent_path();
+			        auto new_file = parent / options.new_file_name;
+			        std::ofstream(new_file).close();
+			        options.is_app_options = options.is_create_file = false;
+			        options.new_file_name[0] = '\0';
+			    }
+			    ImGui::SameLine();
+			    if (ImGui::Button("Ok") && strlen(options.new_file_name) > 0) {
+			        auto parent = std::filesystem::path(options.clicked_path).parent_path();
+			        auto new_file = parent / options.new_file_name;
+			        std::ofstream(new_file).close();
+			        options.is_app_options = options.is_create_file = false;
+			        options.new_file_name[0] = '\0';
+			    }
+			}
             ImGui::Selectable("Cut", false, 0, ImVec2(0, 40));
             if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(0)) {
                 options.copy_path = options.clicked_path;
@@ -412,27 +437,41 @@ void main_window(OPTIONS& options, ImGuiWindowFlags file_manager_window_flags, I
             ImGui::Selectable("New folder", false, 0, ImVec2(0, 40));
             if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(0))  options.is_create_folder = true;
             if (options.is_create_folder) {
-                ImGui::InputText("##new_folder_name", options.new_folder_name, 100);
-                ImGui::SameLine();
-                if (ImGui::Button("Ok") && strcmp(options.new_folder_name, "") != 0) {
-                    std::system(("mkdir " + options.clicked_path + SLASH + options.new_folder_name).c_str());
-                    options.is_dir_options = false;
-                    options.is_create_folder = false;
-                    options.new_folder_name[0] = '\0';
-                }
-            }
+			    ImGui::SetKeyboardFocusHere();
+			    if (ImGui::InputText("##new_folder_name", options.new_folder_name, 100, 
+			        ImGuiInputTextFlags_EnterReturnsTrue)) {
+			        auto new_dir = std::filesystem::path(options.clicked_path) / options.new_folder_name;
+			        std::filesystem::create_directory(new_dir);
+			        options.is_dir_options = options.is_create_folder = false;
+			        options.new_folder_name[0] = '\0';
+			    }
+			    ImGui::SameLine();
+			    if (ImGui::Button("Ok") && strlen(options.new_folder_name) > 0) {
+			        auto new_dir = std::filesystem::path(options.clicked_path) / options.new_folder_name;
+			        std::filesystem::create_directory(new_dir);
+			        options.is_dir_options = options.is_create_folder = false;
+			        options.new_folder_name[0] = '\0';
+			    }
+			}
             ImGui::Selectable("New file", false, 0, ImVec2(0, 40));
             if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(0)) options.is_create_file = true;
             if (options.is_create_file) {
-                ImGui::InputText("##new_file_name", options.new_file_name, 100);
-                ImGui::SameLine();
-                if (ImGui::Button("Ok") && strcmp(options.new_file_name, "") != 0) {
-                    std::system(("touch " + options.clicked_path + SLASH + options.new_file_name).c_str());
-                    options.is_dir_options = false;
-                    options.is_create_file = false;
-                    options.new_file_name[0] = '\0';
-                }
-            }
+			    ImGui::SetKeyboardFocusHere();
+			    if (ImGui::InputText("##new_file_name", options.new_file_name, 100, 
+			        ImGuiInputTextFlags_EnterReturnsTrue)) {
+			        auto new_file = std::filesystem::path(options.clicked_path) / options.new_file_name;
+			        std::ofstream(new_file).close();
+			        options.is_dir_options = options.is_create_file = false;
+			        options.new_file_name[0] = '\0';
+			    }
+			    ImGui::SameLine();
+			    if (ImGui::Button("Ok") && strlen(options.new_file_name) > 0) {
+			        auto new_file = std::filesystem::path(options.clicked_path) / options.new_file_name;
+			        std::ofstream(new_file).close();
+			        options.is_dir_options = options.is_create_file = false;
+			        options.new_file_name[0] = '\0';
+			    }
+			}
             ImGui::BeginDisabled(options.copy_path.empty() ? true : false);
             ImGui::Selectable("Paste", false, 0, ImVec2(0, 40));
             if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(0) && options.copy_path != options.clicked_path) {
